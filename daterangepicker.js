@@ -99,10 +99,9 @@
                 '<div class="calendar left">' +
                     '<div class="daterangepicker_input">' +
                       '<input class="input-mini form-control" type="text" name="daterangepicker_start" value="" />' +
-                      '<i class="fa fa-calendar glyphicon glyphicon-calendar"></i>' +
+                      '<i class="cqi-sm cqi-calendar"></i>' +
                       '<div class="calendar-time">' +
                         '<div></div>' +
-                        '<i class="fa fa-clock-o glyphicon glyphicon-time"></i>' +
                       '</div>' +
                     '</div>' +
                     '<div class="calendar-table"></div>' +
@@ -110,10 +109,10 @@
                 '<div class="calendar right">' +
                     '<div class="daterangepicker_input">' +
                       '<input class="input-mini form-control" type="text" name="daterangepicker_end" value="" />' +
-                      '<i class="fa fa-calendar glyphicon glyphicon-calendar"></i>' +
+                      '<i class="cqi-sm cqi-calendar"></i>' +
                       '<div class="calendar-time">' +
                         '<div></div>' +
-                        '<i class="fa fa-clock-o glyphicon glyphicon-time"></i>' +
+                        '<i class="cqi-sm cqi-clock"></i>' +
                       '</div>' +
                     '</div>' +
                     '<div class="calendar-table"></div>' +
@@ -272,6 +271,9 @@
 
         if (typeof options.alwaysShowCalendars === 'boolean')
             this.alwaysShowCalendars = options.alwaysShowCalendars;
+    
+        if (typeof options.customClass === 'string') this.customClass = options.customClass;
+        this.container.addClass(this.customClass);
 
         // update day names order to firstDay
         if (this.locale.firstDay != 0) {
@@ -332,7 +334,7 @@
 
                 // If the end of the range is before the minimum or the start of the range is
                 // after the maximum, don't display this range option at all.
-                if ((this.minDate && end.isBefore(this.minDate, this.timepicker ? 'minute' : 'day')) 
+                if ((this.minDate && end.isBefore(this.minDate, this.timepicker ? 'minute' : 'day'))
                   || (maxDate && start.isAfter(maxDate, this.timepicker ? 'minute' : 'day')))
                     continue;
 
@@ -525,6 +527,31 @@
             this.updateMonthsInView();
         },
 
+        setMinDate: function(minDate){
+            if (typeof minDate === 'string')
+                this.minDate = moment(minDate, this.locale.format);
+        
+            if (typeof minDate === 'object')
+                this.minDate = moment(minDate);
+        
+            if (!this.timePicker)
+                this.minDate = this.minDate.startOf('day');
+        
+            if (this.timePicker && this.timePickerIncrement)
+                this.minDate.minute(Math.round(this.minDate.minute() / this.timePickerIncrement) * this.timePickerIncrement);
+        
+            if (this.minDate && this.startDate.isBefore(this.minDate)) {
+                this.startDate = this.minDate.clone();
+                if (this.timePicker && this.timePickerIncrement)
+                    this.startDate.minute(Math.round(this.startDate.minute() / this.timePickerIncrement) * this.timePickerIncrement);
+            }
+        
+            if (!this.isShowing)
+                this.updateElement();
+        
+            this.updateMonthsInView();
+        },
+
         isInvalidDate: function() {
             return false;
         },
@@ -710,7 +737,7 @@
                 html += '<th></th>';
 
             if ((!minDate || minDate.isBefore(calendar.firstDay)) && (!this.linkedCalendars || side == 'left')) {
-                html += '<th class="prev available"><i class="fa fa-' + arrow.left + ' glyphicon glyphicon-' + arrow.left + '"></i></th>';
+                html += '<th class="prev available"><i class="cq-sm cqi-' + arrow.left + '"></i></th>';
             } else {
                 html += '<th></th>';
             }
@@ -752,7 +779,7 @@
 
             html += '<th colspan="5" class="month">' + dateHtml + '</th>';
             if ((!maxDate || maxDate.isAfter(calendar.lastDay)) && (!this.linkedCalendars || side == 'right' || this.singleDatePicker)) {
-                html += '<th class="next available"><i class="fa fa-' + arrow.right + ' glyphicon glyphicon-' + arrow.right + '"></i></th>';
+                html += '<th class="next available"><i class="cq-sm cqi-' + arrow.right + '"></i></th>';
             } else {
                 html += '<th></th>';
             }
@@ -909,7 +936,7 @@
             // hours
             //
 
-            html = '<select class="hourselect">';
+            html = '<div class="datepicker-select-wrap"> <select class="hourselect">';
 
             var start = this.timePicker24Hour ? 0 : 1;
             var end = this.timePicker24Hour ? 23 : 12;
@@ -935,13 +962,13 @@
                 }
             }
 
-            html += '</select> ';
+            html += '</select><i class="cqi-sm cqi-chevron-down datepicker-select-wrap-chevron"></i></div>';
 
             //
             // minutes
             //
 
-            html += ': <select class="minuteselect">';
+            html += ':<div class="datepicker-select-wrap"> <select class="minuteselect">';
 
             for (var i = 0; i < 60; i += this.timePickerIncrement) {
                 var padded = i < 10 ? '0' + i : i;
@@ -962,7 +989,7 @@
                 }
             }
 
-            html += '</select> ';
+            html += '</select><i class="cqi-sm cqi-chevron-down datepicker-select-wrap-chevron"></i></div>';
 
             //
             // seconds
@@ -1534,7 +1561,7 @@
             this.container.find('input[name="daterangepicker_start"], input[name="daterangepicker_end"]').removeClass('active');
             $(e.target).addClass('active');
 
-            // Set the state such that if the user goes back to using a mouse, 
+            // Set the state such that if the user goes back to using a mouse,
             // the calendars are aware we're selecting the end of the range, not
             // the start. This allows someone to edit the end of a date range without
             // re-selecting the beginning, by clicking on the end date input then
@@ -1573,7 +1600,7 @@
             // Other browsers and versions of IE are untested and the behaviour is unknown.
             if (e.keyCode === 13) {
                 // Prevent the calendar from being updated twice on Chrome/Firefox/Edge
-                e.preventDefault(); 
+                e.preventDefault();
                 this.formInputsChanged(e);
             }
         },
